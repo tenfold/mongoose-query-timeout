@@ -24,7 +24,7 @@ function validateOptions(timeout, errorHandler) {
     let intValue = parseInt(timeout, 10);
     if (Number.isNaN(intValue) || intValue.toString() !== timeout.toString()) {
         errors.push({
-            field: 'timeout', 
+            field: 'timeout',
             message: 'Invalid number provided'
         });
     }
@@ -37,15 +37,15 @@ function validateOptions(timeout, errorHandler) {
 
 /**
  * Plugin to add query timeouts to a schema
- * @param {Object} options - options to configure the plugin
- * @param {Number} options.timeout - Query timeout in miliseconds
- * @param {Function} options.errorHandler - Function to be called with the error thrown by mongo in case the query timesout
- * @param {Object} options.methods - By default timeouts will be added to `count`, `find`, `findOne`,
+ * @param {Object} [options={}] - options to configure the plugin
+ * @param {Number} [options.timeout=15000] - Query timeout in miliseconds
+ * @param {Function} [options.errorHandler] - Function to be called with the error thrown by mongo in case the query timesout
+ * @param {Object} [options.methods] - By default timeouts will be added to `count`, `find`, `findOne`,
  * `findOneAndRemove`, `findOneAndUpdate` and `update`. If you want to prevent some of those methods from
  * having timeouts, provide an object with the properties being the name of the method and false as the value
  */
 function QueryTimeout(options = {}) {
-    const { 
+    const {
         timeout = DEFAULT_TIMEOUT,
         methods = {},
         errorHandler = () => {}
