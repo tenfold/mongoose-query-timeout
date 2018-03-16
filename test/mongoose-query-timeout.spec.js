@@ -87,8 +87,12 @@ describe('mongoose-query-timeout.spec.js', function () {
     it('should invoke the error handler with the error thrown by mongo', function () {
         const schema = createMockSchema();
         const errorHandler = sinon.stub();
+        const error = new Error('unit test error');
+        error.code = 50;
+        error.codeName = 'ExceededTimeLimit';
+
         QueryTimeout({ errorHandler })(schema);
-        schema.postCallback(new Error('unitTestError'), null, () => {});
+        schema.postCallback(error, null, () => {});
         sinon.assert.calledOnce(errorHandler);
     });
 });

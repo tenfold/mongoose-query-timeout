@@ -1,12 +1,17 @@
+const MONGOOSE_TIMEOUT_ERROR_CODE = 50;
 const DEFAULT_TIMEOUT = 15000; // Milliseconds
 const METHODS = ['count', 'find', 'findOne', 'findOneAndRemove', 'findOneAndUpdate', 'update'];
+
+function isTimeoutError(error) {
+    return error.code === MONGOOSE_TIMEOUT_ERROR_CODE;
+}
 
 function addTimeoutToMethod(schema, method, timeout, errorHandler) {
     schema.pre(method, function () {
         this.maxTime(timeout);
     });
     schema.post(method, function (error, doc, next) {
-        if (errorHandler) {
+        if (errorHandler && isTimeoutError(error)) {
             errorHandler(error);
         }
         next();
