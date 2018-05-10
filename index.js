@@ -12,7 +12,7 @@ function addTimeoutToMethod(schema, method, timeout, errorHandler) {
     });
     schema.post(method, function (error, doc, next) {
         if (errorHandler && isTimeoutError(error)) {
-            errorHandler(error);
+            errorHandler(error, this);
         }
         next();
     });
@@ -44,7 +44,8 @@ function validateOptions(timeout, errorHandler) {
  * Plugin to add query timeouts to a schema
  * @param {Object} [options={}] - options to configure the plugin
  * @param {Number} [options.timeout=15000] - Query timeout in miliseconds
- * @param {Function} [options.errorHandler] - Function to be called with the error thrown by mongo in case the query timesout
+ * @param {Function} [options.errorHandler] - Function to be called with the error 
+ * thrown by mongo in case the query times out, and the query that caused the timeout.
  * @param {Object} [options.methods] - By default timeouts will be added to `count`, `find`, `findOne`,
  * `findOneAndRemove`, `findOneAndUpdate` and `update`. If you want to prevent some of those methods from
  * having timeouts, provide an object with the properties being the name of the method and false as the value

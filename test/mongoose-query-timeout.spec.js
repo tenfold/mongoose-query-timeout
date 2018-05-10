@@ -5,22 +5,30 @@ const QueryTimeout = require('../index');
 describe('mongoose-query-timeout.spec.js', function () {
     let sandbox;
 
+    class MockQuery {
+        constructor() {
+            this.timeout = QueryTimeout.DEFAULT_TIMEOUT;
+        }
+
+        maxTime(timeout) {
+            this.timeout = timeout;
+        }
+
+        pre(method, callback) {
+            callback.call(this);
+        }
+
+        post(method, callback) {
+            this.postCallback = callback;
+        }
+
+        postCallback(error, doc, next) {
+            next.call(this);
+        }
+    }
+
     function createMockSchema() {
-        return {
-            timeout: QueryTimeout.DEFAULT_TIMEOUT,
-            maxTime(timeout) {
-                this.timeout = timeout;
-            },
-            pre(method, callback) {
-                callback.call(this);
-            },
-            post(method, callback) {
-                this.postCallback = callback;
-            },
-            postCallback(error, doc, next) {
-                next();
-            }
-        };
+        return new MockQuery();
     }
 
     beforeEach(function () {
@@ -84,7 +92,8 @@ describe('mongoose-query-timeout.spec.js', function () {
         expect(actualMethods).to.not.include('find');
     });
 
-    it('should invoke the error handler with the error thrown by mongo', function () {
+    it('should invoke the error handler with the error thrown by mongo and the query ' + 
+            'that caused the timeout', function () {
         const schema = createMockSchema();
         const errorHandler = sinon.stub();
         const error = new Error('unit test error');
@@ -94,5 +103,8 @@ describe('mongoose-query-timeout.spec.js', function () {
         QueryTimeout({ errorHandler })(schema);
         schema.postCallback(error, null, () => {});
         sinon.assert.calledOnce(errorHandler);
+        const args = errorHandler.firstCall.args;
+        expect(args[0]).to.be.instanceOf(Error);
+        expect(args[1]).to.be.instanceOf(MockQuery);
     });
 });
